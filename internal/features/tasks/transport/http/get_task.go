@@ -1,0 +1,35 @@
+package tasks_transport_http
+
+import (
+	"net/http"
+
+	core_logger "github.com/i-dontneedaname/study-todoapp/internal/core/logger"
+	core_http_request "github.com/i-dontneedaname/study-todoapp/internal/core/transport/http/request"
+	core_http_response "github.com/i-dontneedaname/study-todoapp/internal/core/transport/http/response"
+)
+
+type GetTaskReponse TaskDTOResponse
+
+func (h *TaskHTTPHandler) GetTask(rw http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	log := core_logger.FromContext(ctx)
+	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+
+	taskId, err := core_http_request.GetIntPathValue(r, "id")
+	if err != nil {
+		responseHandler.ErrorResponse(err, "failed to get task_id path value")
+
+		return
+	}
+
+	taskDomain, err := h.tasksService.GetTask(ctx, taskId)
+	if err != nil {
+		responseHandler.ErrorResponse(err, "failed to get task")
+
+		return
+	}
+
+	response := GetTaskReponse(taskDTOFromDomain(taskDomain))
+
+	responseHandler.JSONResponse(response, http.StatusOK)
+}
