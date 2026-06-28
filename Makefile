@@ -19,6 +19,15 @@ env-cleanup:
 		echo "Cleaning canceled"; \
 		fi
 
+logs-cleanup:
+	@read -p "Cleanup all logs? [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Logs cleaned"; \
+	else \
+		echo "Cleaning canceled"; \
+		fi
+
 env-port-forward:
 	@docker compose up -d port-forwarder
 
@@ -58,11 +67,11 @@ todoapp-run:
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/todoapp/main.go
 
-logs-cleanup:
-	@read -p "Cleanup all logs? [y/N]: " ans; \
-	if [ "$$ans" = "y" ]; then \
-		rm -rf ${PROJECT_ROOT}/out/logs && \
-		echo "Logs cleaned"; \
-	else \
-		echo "Cleaning canceled"; \
-		fi
+todoapp-deploy:
+	@docker compose up -d --build todoapp
+
+todoapp-undeploy:
+	@docker compose down todoapp
+
+ps:
+	@docker compose ps
